@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIMS 2.1.14 - 智能会议拓扑管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Layer 0 -->
+    <div id="background-layer">
+        <div class="bg-pattern"></div>
+        <div class="bg-vignette-strong"></div>
+    </div>
+
+    <div id="viewport">
+        <div id="canvas-world">
+            <svg id="svg-lines" class="svg-layer"></svg>
+            <div id="nodes-container"></div>
+        </div>
+    </div>
+
+    <!-- Layer 1: UI -->
+    <div id="ui-layer" class="w-full h-full flex flex-col relative pointer-events-none">
+        
+        <!-- Header -->
+        <header class="layout-header flex items-center justify-between px-6 pointer-events-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-[44px] h-[29px] flex-shrink-0">
+                    <svg width="54" height="36" viewBox="0 0 54 36" fill="none" class="w-full h-full">
+                        <circle cx="18" cy="18" r="18" fill="#A94DFF" fill-opacity="0.9"/>
+                        <circle cx="36" cy="18" r="18" fill="#18F7F5" fill-opacity="0.9" style="mix-blend-mode: screen;"/>
+                    </svg>
+                </div>
+                <span class="text-base font-bold text-white tracking-wide opacity-90">AIMS 智能会议管理系统</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="relative group z-50">
+                    <div class="flex items-center gap-2 cursor-pointer bg-white/5 border border-white/10 hover:border-[#A94DFF]/50 transition-colors rounded-md px-3 py-1.5 backdrop-blur-sm">
+                        <span class="text-xs font-bold text-white/90">全部平台</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 text-white/50"></i>
+                    </div>
+                    <div class="absolute top-full right-0 mt-1 w-32 bg-[#1a1a1a]/95 border border-white/10 rounded-md shadow-[0_4px_20px_rgba(0,0,0,0.6)] backdrop-blur-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                        <div class="py-1">
+                            <div class="px-3 py-2 text-xs text-white/70 hover:bg-white/10 hover:text-white cursor-pointer transition-colors">全部平台</div>
+                            <div class="px-3 py-2 text-xs text-white/70 hover:bg-white/10 hover:text-white cursor-pointer transition-colors">西北节点</div>
+                            <div class="px-3 py-2 text-xs text-white/70 hover:bg-white/10 hover:text-white cursor-pointer transition-colors">华东节点</div>
+                            <div class="px-3 py-2 text-xs text-white/70 hover:bg-white/10 hover:text-white cursor-pointer transition-colors">研发中心</div>
+                            <div class="px-3 py-2 text-xs text-white/70 hover:bg-white/10 hover:text-white cursor-pointer transition-colors">华南节点</div>
+                            <div class="px-3 py-2 text-xs text-white/70 hover:bg-white/10 hover:text-white cursor-pointer transition-colors">海外节点</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#A94DFF] to-[#7c3aed] flex items-center justify-center text-xs font-bold text-white shadow-[0_0_15px_rgba(169,77,255,0.4)] cursor-pointer hover:scale-105 transition-transform">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 relative overflow-hidden">
+            
+            <!-- Sidebar -->
+            <nav class="layout-sidebar-left pointer-events-auto">
+                <div class="flex-1 overflow-y-auto scrollbar-hide pt-4 pb-4 px-2">
+                    <div class="nav-row nav-row-home active">
+                        <div class="nav-l2-bg-block"></div>
+                        <div class="nav-active-bar"></div>
+                        <i data-lucide="home" class="nav-l1-icon"></i>
+                        <span class="nav-l1-text relative z-10">首页</span>
+                    </div>
+                    <div class="nav-group group-expanded">
+                        <div class="nav-row nav-row-l1" onclick="toggleMenu('menu-device', this)">
+                            <i data-lucide="server" class="nav-l1-icon"></i><span class="nav-l1-text">AI设备管理</span><i data-lucide="chevron-down" class="nav-l1-arrow"></i>
+                        </div>
+                        <div id="menu-device" class="submenu-wrapper" style="max-height: 500px;">
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">一机一档</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">会议空间</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">智能巡检</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">告警管理</span></div>
+                        </div>
+                    </div>
+                    <div class="nav-group group-expanded">
+                        <div class="nav-row nav-row-l1" onclick="toggleMenu('menu-meeting', this)">
+                            <i data-lucide="video" class="nav-l1-icon"></i><span class="nav-l1-text">AI会议管理</span><i data-lucide="chevron-down" class="nav-l1-arrow"></i>
+                        </div>
+                        <div id="menu-meeting" class="submenu-wrapper" style="max-height: 500px;">
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">创建会议</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">正在召开的会议</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">会议模板</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">预约的会议</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">历史会议</span></div>
+                        </div>
+                    </div>
+                    <div class="nav-group group-expanded">
+                        <div class="nav-row nav-row-l1" onclick="toggleMenu('menu-system', this)">
+                            <i data-lucide="settings" class="nav-l1-icon"></i><span class="nav-l1-text">系统设置</span><i data-lucide="chevron-down" class="nav-l1-arrow"></i>
+                        </div>
+                        <div id="menu-system" class="submenu-wrapper" style="max-height: 500px;">
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">用户管理</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">全局配置项</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">授权管理</span></div>
+                            <div class="nav-row nav-row-l2"><div class="nav-l2-bg-block"></div><span class="nav-l2-text">系统日志</span></div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="maximize-btn-wrapper pointer-events-auto">
+                <div class="maximize-btn" title="进入完整拓扑视图">
+                    <i data-lucide="expand" class="w-5 h-5 text-white/60 hover:text-white transition-colors"></i>
+                </div>
+            </div>
+
+            <div id="topo-hint-box" class="topo-hint pointer-events-auto">
+                左键拖拽平移 | 滚轮缩放 | 点击平台展开终端 | 点击会议空间展开IoT
+            </div>
+
+            <!-- Left HUD -->
+            <div class="hud-container hud-left custom-scrollbar pointer-events-none">
+                <div class="hud-bg-gradient-left"></div>
+                <!-- 修正：缩小间距 gap-6 -> gap-2，因为有分割线 -->
+                <div class="relative z-10 w-full h-full flex flex-col justify-start gap-2 py-4 pointer-events-auto">
+                    
+                    <!-- 1. 一机一档 -->
+                    <div class="flex-shrink-0">
+                        <div class="hud-title mb-4">一机一档</div>
+                        <!-- Health Card -->
+                        <div class="tech-card p-4">
+                            <div class="flex flex-col items-center gap-5">
+                                <div class="relative w-[130px] h-[130px] shrink-0">
+                                    <div id="chart-health" class="w-full h-full"></div>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <div class="text-[10px] text-white/40 mb-0.5">设备总数</div>
+                                        <div class="text-xl font-bold text-white font-mono tracking-tight">1315</div>
+                                    </div>
+                                </div>
+                                <div class="w-full grid grid-cols-4 gap-2 text-center">
+                                    <div class="flex flex-col items-center gap-1.5"><span class="flex items-center gap-1.5 text-[12px] text-white/70 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#30F0C0] shadow-[0_0_4px_#30F0C0]"></span>优秀</span><div class="flex flex-col leading-none"><span class="text-sm font-bold text-white mb-0.5">657</span><span class="text-[12px] text-white/30 font-normal">50%</span></div></div>
+                                    <div class="flex flex-col items-center gap-1.5"><span class="flex items-center gap-1.5 text-[12px] text-white/70 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#18F7F5] shadow-[0_0_4px_#18F7F5]"></span>良好</span><div class="flex flex-col leading-none"><span class="text-sm font-bold text-white mb-0.5">394</span><span class="text-[12px] text-white/30 font-normal">30%</span></div></div>
+                                    <div class="flex flex-col items-center gap-1.5"><span class="flex items-center gap-1.5 text-[12px] text-white/70 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shadow-[0_0_4px_#F59E0B]"></span>一般</span><div class="flex flex-col leading-none"><span class="text-sm font-bold text-white mb-0.5">197</span><span class="text-[12px] text-white/30 font-normal">15%</span></div></div>
+                                    <div class="flex flex-col items-center gap-1.5"><span class="flex items-center gap-1.5 text-[12px] text-white/70 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#F05213] shadow-[0_0_4px_#F05213]"></span>较差</span><div class="flex flex-col leading-none"><span class="text-sm font-bold text-white mb-0.5">67</span><span class="text-[12px] text-white/30 font-normal">5%</span></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tech-card p-4 mt-4 h-[160px] flex flex-col">
+                            <div class="flex justify-end mb-1">
+                                <div class="flex gap-4">
+                                    <div class="flex items-center gap-1.5"><span class="w-2 h-0.5 bg-[#18F7F5] shadow-[0_0_4px_#18F7F5]"></span><span class="text-[10px] text-white/50">在线</span></div>
+                                    <div class="flex items-center gap-1.5"><span class="w-2 h-0.5 bg-[#A94DFF] shadow-[0_0_4px_#A94DFF]"></span><span class="text-[10px] text-white/50">会议中</span></div>
+                                </div>
+                            </div>
+                            <div id="chart-terminal" class="flex-1 w-full relative"></div>
+                        </div>
+                    </div>
+
+                    <div class="hud-separator opacity-30"></div>
+
+                    <!-- 2. 会议空间 -->
+                    <div class="flex-shrink-0">
+                        <div class="hud-title mb-4">会议空间</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="tech-card p-3.5 relative group flex flex-col items-start gap-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="icon-box-framed cyan no-glow border-[#18F7F5]/30"><i data-lucide="monitor" class="w-5 h-5 text-[#18F7F5]"></i></div>
+                                    <div class="flex flex-col"><span class="text-xs text-white/50">会议室</span><span class="text-xl font-bold text-white">128</span></div>
+                                </div>
+                                <div class="w-full h-px bg-white/5 my-1"></div>
+                                <div class="flex items-center justify-between w-full"><span class="text-[12px] text-white/40">异常</span><span class="text-[12px] font-bold text-[#F05213] text-glow-red">2</span></div>
+                            </div>
+                            <div class="tech-card p-3.5 relative group flex flex-col items-start gap-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="icon-box-framed cyan no-glow border-[#18F7F5]/30"><i data-lucide="server" class="w-5 h-5 text-[#18F7F5]"></i></div>
+                                    <div class="flex flex-col"><span class="text-xs text-white/50">机房</span><span class="text-xl font-bold text-white">12</span></div>
+                                </div>
+                                <div class="w-full h-px bg-white/5 my-1"></div>
+                                <div class="flex items-center justify-between w-full"><span class="text-[12px] text-white/40">异常</span><span class="text-[12px] font-bold text-white/30">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1"></div>
+                </div>
+            </div>
+
+            <!-- Right HUD -->
+            <div class="hud-container hud-right custom-scrollbar pointer-events-none">
+                <div class="hud-bg-gradient-right"></div>
+
+                <!-- 修正：增大间距 gap-4 -> gap-6，让模块更宽松 -->
+                <div class="relative z-10 w-full h-full flex flex-col justify-start gap-6 py-4 pointer-events-auto">
+                    
+                    <!-- 1. 未修复告警 -->
+                    <div class="flex-shrink-0">
+                        <div class="hud-title mb-4">未修复告警</div>
+                        <div class="tech-card p-4">
+                            <div class="w-full grid grid-cols-3 gap-2 text-center">
+                                <div class="flex flex-col items-center gap-2"><span class="flex items-center gap-1.5 text-[12px] text-white/70 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#F05213] shadow-[0_0_4px_#F05213]"></span>严重</span><span class="text-xl font-bold text-[#F05213] font-mono">4</span></div>
+                                <div class="flex flex-col items-center gap-2"><span class="flex items-center gap-1.5 text-[12px] text-white/70 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B] shadow-[0_0_4px_#F59E0B]"></span>重要</span><span class="text-xl font-bold text-[#F59E0B] font-mono">42</span></div>
+                                <div class="flex flex-col items-center gap-2"><span class="flex items-center gap-1.5 text-[12px] text-white/70 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-[#FFDD33] shadow-[0_0_4px_#FFDD33]"></span>一般</span><span class="text-xl font-bold text-white font-mono">128</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 会议资源 -->
+                    <div class="flex-shrink-0">
+                        <div class="hud-title mb-4">会议资源</div>
+                        <div class="tech-card p-4">
+                            <div id="resource-bars" class="grid grid-cols-2 gap-x-8 gap-y-6"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 正在召开的会议 (修正：px-4 py-3 减小上边距) -->
+                    <div class="flex-shrink-0">
+                        <div class="hud-title mb-2">正在召开会议</div>
+                        <div class="tech-card px-4 py-3 h-[160px] flex flex-col">
+                            <div id="chart-meeting" class="flex-1 w-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- 4. AI 对话 (修正：px-3 py-2 减小边距) -->
+                    <div class="flex-1 flex flex-col min-h-[140px]">
+                        <div class="hud-title mb-2 flex-shrink-0">AI 对话助手</div>
+                        <div class="tech-card flex-1 flex flex-col min-h-0 px-3 py-2">
+                            <div class="flex-1 overflow-y-auto custom-scrollbar mb-2 pr-1 flex flex-col justify-end">
+                                <div class="ai-msg-bubble mb-2">
+                                    <div class="text-xs text-white/80 leading-relaxed">系统检测到西北节点 (P1) 出现网络抖动，建议关注。</div>
+                                </div>
+                                <div class="text-xs text-white/30 leading-relaxed italic px-2">是否需要调取详细日志？</div>
+                            </div>
+                            <div class="h-9 bg-white/5 border border-white/10 rounded flex items-center px-3 gap-2 mt-auto hover:bg-white/10 transition-colors shrink-0">
+                                <input type="text" placeholder="输入指令..." class="flex-1 bg-transparent border-none outline-none text-xs text-white placeholder-white/30 h-full">
+                                <div class="w-px h-3 bg-white/10"></div>
+                                <i data-lucide="mic" class="w-4 h-4 text-white/40 hover:text-[#18F7F5] cursor-pointer transition-colors"></i>
+                                <i data-lucide="send" class="w-4 h-4 text-[#A94DFF] hover:text-white cursor-pointer transition-colors"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
