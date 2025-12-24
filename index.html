@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能检测 - 动态AI版</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="bg-particles"></div>
+
+    <div class="header">
+        <div class="title-group">
+            <div class="back-btn">←</div>
+            <div class="main-title">智能检测</div>
+        </div>
+        <div class="status-group">
+            <div><span class="status-label">设备温度</span> 42°C</div>
+            <div><span class="status-label">运行时间</span> 00:03:15</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="completed-list" id="completedList"></div>
+
+        <div class="card-frame" id="mainCard">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            <div class="deco-line"></div>
+
+            <div style="display:flex; width:100%; height:100%; align-items:center;" id="cardContent">
+                
+                <div class="meter-container">
+                    <svg class="meter-svg" viewBox="0 0 300 300">
+                        <defs>
+                            <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:var(--accent); stop-opacity:0" />
+                                <stop offset="100%" style="stop-color:var(--accent); stop-opacity:0.05" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"></circle>
+                        <circle class="circle-ticks" cx="150" cy="150" r="130"></circle>
+                        <circle class="circle-progress" id="progressRing" cx="150" cy="150" r="120" transform="rotate(-90 150 150)"></circle>
+                        <path class="radar-sector" d="M150,150 L150,20 A130,130 0 0,1 250,60 z"></path>
+                    </svg>
+                    <div class="data-display">
+                        <div class="big-number" id="progressNum">0</div>
+                        <div class="label-unit">正在分析</div>
+                    </div>
+                </div>
+
+                <div class="info-panel">
+                    <div class="task-header">
+                        <div class="task-id">任务ID: <span id="taskId"></span></div>
+                        <div class="task-title" id="taskName"></div>
+                    </div>
+                    <div class="log-stream" id="logStream">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-view" id="aiView">
+            <div class="ai-core">
+                <div class="ai-glow"></div>
+                <div class="ai-ring ring-1"></div>
+                <div class="ai-ring ring-2"></div>
+                <div class="ai-ring ring-3"></div>
+                <div class="ai-scanner"></div>
+            </div>
+            <div class="ai-title">AI分析报告生成中...</div>
+            <div class="ai-subtext" id="aiSubtext">正在初始化神经网络引擎...</div>
+        </div>
+
+        <div class="queue-list" id="queueList"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
